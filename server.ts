@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
@@ -103,13 +104,29 @@ async function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." },
+  });
+
+  const paymentLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." },
+  });
+
   // API routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
   // Multilingual content translation
-  app.post("/api/translate", async (req, res) => {
+  app.post("/api/translate", apiLimiter, async (req, res) => {
     const { text, targetLanguages } = req.body;
     
     if (!text || !targetLanguages || !Array.isArray(targetLanguages)) {
@@ -144,7 +161,7 @@ async function startServer() {
   });
 
   // AI Content Assistant
-  app.post("/api/ai/suggest-description", async (req, res) => {
+  app.post("/api/ai/suggest-description", apiLimiter, async (req, res) => {
     const { productName, category, keyFeatures } = req.body;
     
     if (!productName) {
@@ -172,7 +189,7 @@ async function startServer() {
   });
 
   // AI Smart Image Search (Predictive Search)
-  app.post("/api/ai/search-images", async (req, res) => {
+  app.post("/api/ai/search-images", apiLimiter, async (req, res) => {
     const { productName, category } = req.body;
     
     if (!productName) {
@@ -217,7 +234,7 @@ async function startServer() {
   });
 
   // Image Moderation
-  app.post("/api/ai/moderate", async (req, res) => {
+  app.post("/api/ai/moderate", apiLimiter, async (req, res) => {
     const { imageUrl, productName } = req.body;
     
     if (!imageUrl) return res.status(400).json({ error: "Image URL is required" });
@@ -251,7 +268,7 @@ async function startServer() {
   });
 
   // Enhanced Payment Processing (M-Pesa, e-Mola, Bank)
-  app.post("/api/payments/process", (req, res) => {
+  app.post("/api/payments/process", paymentLimiter, (req, res) => {
     const { method, phoneNumber, amount, orderIds, customerName } = req.body;
     
     // Basic validation
