@@ -9,7 +9,7 @@ import { cn, formatCurrency } from '../lib/utils';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { getTranslatedField } from '../lib/i18nUtils';
-import heroBg from '../assets/images/mercado_sabush_hero_1780607101474.png';
+import heroBg from '../assets/images/mercado_sabush_hero_marketplace.jpg';
 import { db } from '../lib/firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { ProductSkeleton, StoreSkeleton } from '../components/common/Skeleton';
