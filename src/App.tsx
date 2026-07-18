@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { LocationProvider, useLocation } from './context/LocationContext';
@@ -14,20 +15,21 @@ import { CompareProvider } from './context/CompareContext';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
 import { Marketplace } from './pages/Marketplace';
-import { ProductDetails } from './pages/ProductDetails';
-import { StoreDetails } from './pages/StoreDetails';
-import { Cart } from './pages/Cart';
-import { Login } from './pages/Login';
-import { OrderSuccess } from './pages/OrderSuccess';
-import { RegisterSeller } from './pages/RegisterSeller';
-import { SellerDashboard } from './pages/SellerDashboard';
-import { AdminPanel } from './pages/AdminPanel';
-import { MyOrders } from './pages/MyOrders';
-import { Wishlist } from './pages/Wishlist';
-import { Settings } from './pages/Settings';
-import { Chat } from './pages/Chat';
-import { ShieldOff, LogOut, AlertCircle, ArrowRight } from 'lucide-react';
+import { ShieldOff, LogOut } from 'lucide-react';
 import { PWAManager } from './components/PWAManager';
+
+const ProductDetails = React.lazy(() => import('./pages/ProductDetails').then(m => ({ default: m.ProductDetails })));
+const StoreDetails = React.lazy(() => import('./pages/StoreDetails').then(m => ({ default: m.StoreDetails })));
+const Cart = React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart })));
+const Login = React.lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const OrderSuccess = React.lazy(() => import('./pages/OrderSuccess').then(m => ({ default: m.OrderSuccess })));
+const RegisterSeller = React.lazy(() => import('./pages/RegisterSeller').then(m => ({ default: m.RegisterSeller })));
+const SellerDashboard = React.lazy(() => import('./pages/SellerDashboard').then(m => ({ default: m.SellerDashboard })));
+const AdminPanel = React.lazy(() => import('./pages/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const MyOrders = React.lazy(() => import('./pages/MyOrders').then(m => ({ default: m.MyOrders })));
+const Wishlist = React.lazy(() => import('./pages/Wishlist').then(m => ({ default: m.Wishlist })));
+const Settings = React.lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Chat = React.lazy(() => import('./pages/Chat').then(m => ({ default: m.Chat })));
 
 function AppRoutes() {
   const { user, profile, loading, signOut } = useAuth();
@@ -66,62 +68,70 @@ function AppRoutes() {
 
   return (
     <Layout>
-      <Route path="/">
-        <Home />
-      </Route>
-      <Route path="/marketplace">
-        <Marketplace />
-      </Route>
-      <Route path="/product/:id">
-        {/* Simplified pattern matching handles :id via currentPath check */}
-        <ProductDetails id={window.location.pathname.split('/').pop() || ''} />
-      </Route>
-      <Route path="/store/:id">
-        {/* Simplified pattern matching handles :id via currentPath check */}
-        <StoreDetails id={window.location.pathname.split('/').pop() || ''} />
-      </Route>
-      <Route path="/cart">
-        <Cart />
-      </Route>
-      <Route path="/login">
-        <Login />
-      </Route>
-      <Route path="/order-success">
-        <OrderSuccess />
-      </Route>
-      <Route path="/sell">
-        <RegisterSeller />
-      </Route>
-      <Route path="/register-seller">
-        <RegisterSeller />
-      </Route>
-      <Route path="/messages">
-        {user ? <Chat /> : <Login redirect="/chat" />}
-      </Route>
-      <Route path="/chat">
-        {user ? <Chat /> : <Login redirect="/chat" />}
-      </Route>
-      <Route path="/orders">
-        {user ? <MyOrders /> : <Login redirect="/orders" />}
-      </Route>
-      <Route path="/wishlist">
-        {user ? <Wishlist /> : <Login redirect="/wishlist" />}
-      </Route>
-      <Route path="/profile">
-        {user ? <Settings /> : <Login redirect="/profile" />}
-      </Route>
-      <Route path="/settings">
-        {user ? <Settings /> : <Login redirect="/settings" />}
-      </Route>
-      <Route path="/dashboard">
-        {user ? <SellerDashboard /> : <Login redirect="/dashboard" />}
-      </Route>
-      <Route path="/become-seller">
-        {user ? <RegisterSeller /> : <Login redirect="/become-seller" />}
-      </Route>
-      <Route path="/admin">
-        {profile?.role === 'admin' ? <AdminPanel /> : (user ? <Home /> : <Login redirect="/admin" />)}
-      </Route>
+      <Suspense fallback={
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-900 font-black text-2xl animate-pulse">Mercado Sabush</p>
+          <p className="text-gray-400 text-sm font-bold mt-2 uppercase tracking-widest">Iniciando o Marketplace...</p>
+        </div>
+      }>
+        <Route path="/">
+          <Home />
+        </Route>
+        <Route path="/marketplace">
+          <Marketplace />
+        </Route>
+        <Route path="/product/:id">
+          {/* Simplified pattern matching handles :id via currentPath check */}
+          <ProductDetails id={window.location.pathname.split('/').pop() || ''} />
+        </Route>
+        <Route path="/store/:id">
+          {/* Simplified pattern matching handles :id via currentPath check */}
+          <StoreDetails id={window.location.pathname.split('/').pop() || ''} />
+        </Route>
+        <Route path="/cart">
+          <Cart />
+        </Route>
+        <Route path="/login">
+          <Login />
+        </Route>
+        <Route path="/order-success">
+          <OrderSuccess />
+        </Route>
+        <Route path="/sell">
+          <RegisterSeller />
+        </Route>
+        <Route path="/register-seller">
+          <RegisterSeller />
+        </Route>
+        <Route path="/messages">
+          {user ? <Chat /> : <Login redirect="/chat" />}
+        </Route>
+        <Route path="/chat">
+          {user ? <Chat /> : <Login redirect="/chat" />}
+        </Route>
+        <Route path="/orders">
+          {user ? <MyOrders /> : <Login redirect="/orders" />}
+        </Route>
+        <Route path="/wishlist">
+          {user ? <Wishlist /> : <Login redirect="/wishlist" />}
+        </Route>
+        <Route path="/profile">
+          {user ? <Settings /> : <Login redirect="/profile" />}
+        </Route>
+        <Route path="/settings">
+          {user ? <Settings /> : <Login redirect="/settings" />}
+        </Route>
+        <Route path="/dashboard">
+          {user ? <SellerDashboard /> : <Login redirect="/dashboard" />}
+        </Route>
+        <Route path="/become-seller">
+          {user ? <RegisterSeller /> : <Login redirect="/become-seller" />}
+        </Route>
+        <Route path="/admin">
+          {profile?.role === 'admin' ? <AdminPanel /> : (user ? <Home /> : <Login redirect="/admin" />)}
+        </Route>
+      </Suspense>
     </Layout>
   );
 }
