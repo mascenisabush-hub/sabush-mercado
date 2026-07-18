@@ -1,0 +1,6 @@
+{
+  "name": "Mercado Sabush",
+  "description": "Mercado Sabush - A premium multi-vendor marketplace for Mozambique, connecting retailers and wholesalers with customers across the country.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

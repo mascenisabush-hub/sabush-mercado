@@ -1,0 +1,310 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'sabushmike@gmail.com') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer') == 'admin')
+      );
+    }
+
+    function isNotBanned() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'sabushmike@gmail.com') ||
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isBanned', false) == false
+      );
+    }
+
+    // --- Connection Test ---
+    match /_connection_test_/{docId} {
+      allow read: if true;
+    }
+
+    // --- Users ---
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin()) && 
+        incoming().uid == userId && 
+        incoming().role in ['customer', 'seller', 'admin'] && (
+          incoming().role != 'admin' || request.auth.token.email == 'sabushmike@gmail.com'
+        );
+      allow update: if (isSignedIn() && (request.auth.uid == userId || isAdmin()) && 
+        incoming().uid == existing().uid &&
+        (!('isBanned' in incoming()) || incoming().isBanned == existing().get('isBanned', false)) &&
+        (!('role' in incoming()) || incoming().role == existing().get('role', 'customer') || incoming().role == 'seller' || isAdmin())
+      ) || 
+      (isSignedIn() && request.auth.token.email == 'sabushmike@gmail.com') ||
+      isAdmin();
+
+      match /addresses/{addressId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+
+      match /priceAlerts/{productId} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // --- Stores ---
+    match /stores/{storeId} {
+      function isValidStore(data) {
+        return data.businessName is string && data.businessName.size() <= 100 &&
+               data.ownerId == request.auth.uid &&
+               data.category is string &&
+               data.country is string &&
+               data.currency is string;
+      }
+
+      allow read: if true; // Public listings
+      allow create: if (isSignedIn() || isAdmin()) && isNotBanned() && isValidId(storeId) && isValidStore(incoming()) && incoming().status == 'pending' &&
+                    (incoming().get('isVerifiedBusiness', false) == false || isAdmin());
+      allow update: if (isNotBanned() && (
+                    isAdmin() ||
+                    (isOwner(existing().ownerId) && isValidStore(incoming()) &&
+                     (!incoming().diff(existing()).affectedKeys().hasAny(['isVerifiedBusiness']) || 
+                      incoming().get('isVerifiedBusiness', false) == existing().get('isVerifiedBusiness', false)))
+                    )) ||
+                    (isSignedIn() && isNotBanned() && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'reviewCount']));
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      function isValidProduct(data) {
+        return data.name is string && data.name.size() <= 150 &&
+               data.price is number && data.price >= 0 &&
+               data.storeId is string &&
+               data.category is string &&
+               data.country is string &&
+               data.currency is string;
+      }
+
+      allow read: if true;
+      allow create: if isNotBanned() && isValidId(productId) && isValidProduct(incoming()) &&
+                    (get(/databases/$(database)/documents/stores/$(incoming().storeId)).data.ownerId == request.auth.uid || isAdmin());
+      allow update: if (isNotBanned() && (
+                    get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid || 
+                    isAdmin()) && isValidProduct(incoming())) || 
+                    (isNotBanned() && incoming().status == 'removed' && (get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid || isAdmin())) ||
+                    (isSignedIn() && isNotBanned() && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'reviewCount']));
+      allow delete: if (isNotBanned() && 
+                    get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid) || isAdmin();
+    }
+
+    // --- Categories ---
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false; // System defined for MVP
+    }
+
+    // --- Orders ---
+    match /orders/{orderId} {
+      function isValidOrder(data) {
+        return data.customerId == request.auth.uid &&
+               data.storeId is string &&
+               data.totalAmount is number &&
+               data.totalAmount >= 0 &&
+               data.status in ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] &&
+               data.paymentMethod in ['mpesa', 'emola', 'card', 'cod', 'bank'] &&
+               data.paymentStatus in ['pending', 'paid', 'failed'] &&
+               data.deliveryMethod in ['pickup', 'delivery'] &&
+               data.country is string &&
+               data.currency is string &&
+               data.items is list &&
+               data.items.size() > 0 &&
+               data.whatsappContacted is bool &&
+               data.createdAt is string;
+      }
+
+      function isStoreOwner(storeId) {
+        return isSignedIn() && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      }
+
+      allow get: if isSignedIn() && (isOwner(existing().customerId) || isStoreOwner(existing().storeId) || isAdmin());
+      
+      allow list: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid || 
+        isStoreOwner(resource.data.storeId) || 
+        isAdmin()
+      );
+
+      allow create: if isSignedIn() && isNotBanned() && isValidOrder(incoming()) && 
+                    exists(/databases/$(database)/documents/stores/$(incoming().storeId));
+
+      allow update: if (isSignedIn() && isNotBanned() && (
+        // Customer can cancel
+        (isOwner(existing().customerId) && incoming().status == 'cancelled' && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['status'])) ||
+        // Seller can manage status, payment status, and tracking fields
+        (isStoreOwner(existing().storeId) && 
+         incoming().diff(existing()).affectedKeys().hasAny(['status', 'paymentStatus', 'trackingStatus', 'trackingHistory'])) ||
+        // Payment process updates payment status
+        (isOwner(existing().customerId) && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['paymentStatus']))
+      )) || isAdmin();
+    }
+
+    // --- Chats ---
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn() && isNotBanned() && request.auth.uid in incoming().participants;
+      allow update: if isSignedIn() && isNotBanned() && request.auth.uid in existing().participants;
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if isSignedIn() && isNotBanned() && incoming().senderId == request.auth.uid && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      }
+    }
+
+    // --- Notifications ---
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && isNotBanned() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isNotBanned();
+    }
+
+    // --- Favorites (Wishlist) ---
+    match /favorites/{favoriteId} {
+      function isValidFavorite(data) {
+        return data.userId == request.auth.uid &&
+               data.productId is string &&
+               data.createdAt is string;
+      }
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isNotBanned() && isValidFavorite(incoming());
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // --- RFQs (B2B Inquiries) ---
+    match /rfqs/{rfqId} {
+      function isValidRFQ(data) {
+        return data.customerId == request.auth.uid &&
+               data.storeId is string &&
+               data.productId is string &&
+               data.quantity is number &&
+               data.quantity > 0 &&
+               data.status in ['pending', 'responded', 'closed'] &&
+               data.createdAt is string;
+      }
+      allow list: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid || 
+        get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow get: if isSignedIn() && (
+        existing().customerId == request.auth.uid || 
+        get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && isNotBanned() && isValidRFQ(incoming());
+      allow update: if isSignedIn() && (
+        (get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['status'])) ||
+        isAdmin()
+      );
+    }
+
+    // --- Reports ---
+    match /reports/{reportId} {
+      allow read, list: if isSignedIn() && (request.auth.token.email == 'sabushmike@gmail.com' || isAdmin());
+      allow create: if isSignedIn() && isNotBanned() && incoming().reporterId == request.auth.uid;
+      allow update: if isSignedIn() && (request.auth.token.email == 'sabushmike@gmail.com' || isAdmin());
+    }
+
+    // --- Reviews ---
+    match /reviews/{reviewId} {
+      function isValidReview(data) {
+        return data.userId == request.auth.uid &&
+               ((('productId' in data) && data.productId is string) || (('storeId' in data) && data.storeId is string)) &&
+               data.rating is number &&
+               data.rating >= 1 &&
+               data.rating <= 5 &&
+               data.comment is string &&
+               data.comment.size() <= 1000 &&
+               data.createdAt is string;
+      }
+      allow read: if true;
+      allow create: if isSignedIn() && isNotBanned() && isValidReview(incoming()) && isValidId(reviewId);
+      allow update: if false;
+      allow delete: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+    }
+
+    // --- Promotions ---
+    match /promotions/{promotionId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isNotBanned() && incoming().sellerId == request.auth.uid;
+      allow update: if isSignedIn() && isNotBanned() && existing().sellerId == request.auth.uid && incoming().sellerId == request.auth.uid;
+      allow delete: if isSignedIn() && isNotBanned() && existing().sellerId == request.auth.uid;
+    }
+
+    // --- Coupons ---
+    match /coupons/{couponCode} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isNotBanned() &&
+                    exists(/databases/$(database)/documents/promotions/$(incoming().promotionId)) &&
+                    get(/databases/$(database)/documents/promotions/$(incoming().promotionId)).data.sellerId == request.auth.uid;
+      allow update: if isSignedIn() && isNotBanned() && (
+                    (exists(/databases/$(database)/documents/promotions/$(existing().promotionId)) &&
+                     get(/databases/$(database)/documents/promotions/$(existing().promotionId)).data.sellerId == request.auth.uid) ||
+                    (incoming().diff(existing()).affectedKeys().hasOnly(['usageCount']))
+                  );
+      allow delete: if isSignedIn() && isNotBanned() &&
+                    exists(/databases/$(database)/documents/promotions/$(existing().promotionId)) &&
+                    get(/databases/$(database)/documents/promotions/$(existing().promotionId)).data.sellerId == request.auth.uid;
+    }
+
+    // --- Payouts & Finance ---
+    match /payouts/{sellerId} {
+      allow read: if isSignedIn() && (request.auth.uid == sellerId || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == sellerId || isAdmin());
+
+      match /transactions/{transactionId} {
+        allow read: if isSignedIn() && (request.auth.uid == sellerId || isAdmin());
+        allow create: if isSignedIn() && (request.auth.uid == sellerId || isAdmin());
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // --- Withdrawal Requests ---
+    match /withdrawalRequests/{requestId} {
+      allow read, list: if isSignedIn() && (resource.data.sellerId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isNotBanned() && incoming().sellerId == request.auth.uid && incoming().status == 'pending';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

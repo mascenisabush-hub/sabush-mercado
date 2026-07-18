@@ -1,0 +1,369 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "seller", "admin"] },
+        "isBanned": { "type": "boolean" },
+        "phoneNumber": { "type": "string" },
+        "location": { "type": "string" },
+        "country": { "type": "string" },
+        "currency": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Store": {
+      "title": "Store",
+      "description": "Seller's business information",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "logo": { "type": "string" },
+        "banner": { "type": "string" },
+        "location": { "type": "string" },
+        "country": { "type": "string" },
+        "currency": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "whatsappNumber": { "type": "string" },
+        "deliveryOptions": { "type": "string", "enum": ["pickup", "delivery", "both"] },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "isVerified": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["pending", "active", "suspended"] },
+        "hashedPassword": { "type": "string" },
+        "responseRate": { "type": "number" },
+        "fulfillmentRate": { "type": "number" },
+        "averageResponseTime": { "type": "string" },
+        "isVerifiedBusiness": { "type": "boolean" },
+        "totalSales": { "type": "number" }
+      },
+      "required": ["ownerId", "businessName", "category"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Marketplace product listing",
+      "type": "object",
+      "properties": {
+        "storeId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "minOrderQuantity": { "type": "number" },
+        "wholesalePrices": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "minQuantity": { "type": "number" },
+              "price": { "type": "number" }
+            }
+          }
+        },
+        "category": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "stock": { "type": "number" },
+        "deliveryAvailable": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "hidden", "out_of_stock"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "colors": { "type": "array", "items": { "type": "string" } },
+        "sizes": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["storeId", "name", "price", "category"]
+    },
+    "RFQ": {
+      "title": "RFQ",
+      "description": "Request for Quotation from customer to seller",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string" },
+        "storeId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "responded", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerId", "storeId", "productId", "quantity", "status"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "User's favorited products (Wishlist)",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "productId"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Product or Store review and rating",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "storeId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "rating", "comment"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category metadata",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "icon": { "type": "string" },
+        "productCount": { "type": "number" },
+        "sellerCount": { "type": "number" }
+      },
+      "required": ["name"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase transaction",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string" },
+        "storeId": { "type": "string" },
+        "productIds": { "type": "array", "items": { "type": "string" } },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"] },
+        "paymentMethod": { "type": "string", "enum": ["mpesa", "emola", "card", "cod", "bank"] },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "deliveryMethod": { "type": "string", "enum": ["pickup", "delivery"] },
+        "deliveryAddress": { "type": "string" },
+        "country": { "type": "string" },
+        "currency": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerId", "storeId", "totalAmount", "status"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "Real-time communication between buyer and seller",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "orderId": { "type": "string" }
+      },
+      "required": ["participants"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "An individual chat message",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "senderId", "text"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notifications for orders and chats",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["order", "chat", "mpesa"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "User reports for violations",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["user", "store", "product"] },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "resolved", "ignored"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "targetId", "targetType", "reason", "status"]
+    },
+    "Promotion": {
+      "title": "Promotion",
+      "description": "Seller promotions, flash sales, bundle deals, coupons",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "type": { "type": "string", "enum": ["discount", "flash_sale", "bundle", "coupon"] },
+        "label": { "type": "string" },
+        "discountPercentage": { "type": "number" },
+        "applicableProductIds": { "type": "array", "items": { "type": "string" } },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "usageLimit": { "type": "number" },
+        "usageCount": { "type": "number" }
+      },
+      "required": ["id", "sellerId", "type", "label", "discountPercentage", "applicableProductIds", "startDate", "endDate", "isActive"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Store coupon codes",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "promotionId": { "type": "string" },
+        "discountPercentage": { "type": "number" },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "usageLimit": { "type": "number" },
+        "usageCount": { "type": "number" }
+      },
+      "required": ["code", "promotionId", "discountPercentage", "expiryDate", "isActive"]
+    },
+    "PayoutSummary": {
+      "title": "PayoutSummary",
+      "description": "Seller payout and financial summary",
+      "type": "object",
+      "properties": {
+        "sellerId": { "type": "string" },
+        "totalEarned": { "type": "number" },
+        "totalPending": { "type": "number" },
+        "totalWithdrawn": { "type": "number" },
+        "availableBalance": { "type": "number" },
+        "currency": { "type": "string", "enum": ["MZN", "USD", "ZAR"] },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sellerId", "totalEarned", "totalPending", "totalWithdrawn", "availableBalance", "currency", "lastUpdated"]
+    },
+    "PayoutTransaction": {
+      "title": "PayoutTransaction",
+      "description": "Earning, refund, deduction or withdrawal transaction details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "type": { "type": "string", "enum": ["earning", "withdrawal", "refund", "commission_deduction"] },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "enum": ["MZN", "USD", "ZAR"] },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
+        "orderId": { "type": ["string", "null"] },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "sellerId", "type", "amount", "currency", "status", "description", "timestamp"]
+    },
+    "WithdrawalRequest": {
+      "title": "WithdrawalRequest",
+      "description": "Seller request to withdraw available funds",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "enum": ["MZN", "USD", "ZAR"] },
+        "paymentMethod": { "type": "string", "enum": ["mpesa", "bank_transfer", "emola"] },
+        "accountDetails": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "requestedAt": { "type": "string", "format": "date-time" },
+        "resolvedAt": { "type": ["string", "null"], "format": "date-time" },
+        "adminNote": { "type": ["string", "null"] }
+      },
+      "required": ["id", "sellerId", "amount", "currency", "paymentMethod", "accountDetails", "status", "requestedAt"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Collection of user profiles"
+    },
+    "stores": {
+      "schema": "Store",
+      "description": "Collection of seller stores"
+    },
+    "products": {
+      "schema": "Product",
+      "description": "All marketplace product listings"
+    },
+    "categories": {
+      "schema": "Category",
+      "description": "Available product categories"
+    },
+    "orders": {
+      "schema": "Order",
+      "description": "Purchase orders placed by customers"
+    },
+    "chats": {
+      "schema": "Chat",
+      "description": "Active chat conversations"
+    },
+    "notifications": {
+      "schema": "Notification",
+      "description": "System and user notifications"
+    },
+    "reports": {
+      "schema": "Report",
+      "description": "User reports for violations"
+    },
+    "promotions": {
+      "schema": "Promotion",
+      "description": "Seller promotions"
+    },
+    "coupons": {
+      "schema": "Coupon",
+      "description": "Discount coupon codes"
+    },
+    "rfqs": {
+      "schema": "RFQ",
+      "description": "Business inquiries and quote requests"
+    },
+    "favorites": {
+      "schema": "Favorite",
+      "description": "Items saved to wishlist by users"
+    },
+    "reviews": {
+      "schema": "Review",
+      "description": "Customer reviews for products"
+    },
+    "payouts/{sellerId}": {
+      "schema": "PayoutSummary",
+      "description": "Financial summary for a specific seller"
+    },
+    "payouts/{sellerId}/transactions/{transactionId}": {
+      "schema": "PayoutTransaction",
+      "description": "Financial transaction history (earnings, withdrawal, deductions) for a specific seller"
+    },
+    "withdrawalRequests/{requestId}": {
+      "schema": "WithdrawalRequest",
+      "description": "Withdrawal request submitted by seller to be processed by admin"
+    }
+  }
+}
