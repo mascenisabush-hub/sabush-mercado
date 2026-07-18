@@ -140,10 +140,17 @@ export function MyOrders() {
                  <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center", getStatusColor(order.status).split(' ')[0])}>
                     {getStatusIcon(order.status)}
                  </div>
-                 <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('orders.order_id')}</p>
-                    <p className="text-sm font-mono font-bold text-gray-900 group-hover:text-blue-600 transition-colors">#{order.id.slice(0, 12).toUpperCase()}</p>
-                 </div>
+                  <div>
+                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t('orders.order_id')}</p>
+                     <div className="flex items-center gap-2">
+                       <p className="text-sm font-mono font-bold text-gray-900 group-hover:text-blue-600 transition-colors">#{order.id.slice(0, 12).toUpperCase()}</p>
+                       {order.paymentSimulated && (
+                         <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-200/50">
+                           SIMULATED
+                         </span>
+                       )}
+                     </div>
+                  </div>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-6 md:flex-1 justify-end w-full md:w-auto">
                 <OrderProgressSteps status={order.status} className="w-full sm:max-w-[280px] md:max-w-[320px]" />

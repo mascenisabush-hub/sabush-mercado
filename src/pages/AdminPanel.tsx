@@ -1178,7 +1178,14 @@ function OrderRow({ order }: { order: Order }) {
   return (
     <>
       <td className="px-6 py-5">
-        <p className="font-mono text-xs font-bold text-gray-600 uppercase">#{order.id.slice(0, 8)}</p>
+        <div className="flex items-center gap-2">
+          <p className="font-mono text-xs font-bold text-gray-600 uppercase">#{order.id.slice(0, 8)}</p>
+          {order.paymentSimulated && (
+            <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-200/50">
+              SIMULATED
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-6 py-5">
         <p className="text-xs font-bold text-gray-900 truncate max-w-[120px] font-mono">{order.customerId.slice(-6)}...</p>

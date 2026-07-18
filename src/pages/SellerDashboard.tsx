@@ -2527,9 +2527,16 @@ export function SellerDashboard() {
                        <tbody className="divide-y divide-gray-50">
                           {orders.length > 0 ? orders.map(order => (
                              <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-8 py-6">
-                                   <p className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">#{order.id.slice(-8).toUpperCase()}</p>
-                                </td>
+                                 <td className="px-8 py-6">
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">#{order.id.slice(-8).toUpperCase()}</p>
+                                      {order.paymentSimulated && (
+                                        <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-200/50">
+                                          SIMULATED
+                                        </span>
+                                      )}
+                                    </div>
+                                 </td>
                                 <td className="px-8 py-6">
                                    <p className="font-bold text-gray-900">{order.isGuest 
                                       ? `${order.guestName || 'Cliente Convidado'} (Guest)` 

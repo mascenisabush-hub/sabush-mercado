@@ -360,6 +360,7 @@ export function Cart() {
         for (const order of orders) {
           await updateDoc(doc(db, 'orders', order.id), {
             paymentStatus: paymentMethod === 'bank' ? 'pending_confirmation' : 'paid',
+            paymentSimulated: true,
             gatewayReference: result.gatewayReference,
             transactionId: result.transactionId
           });

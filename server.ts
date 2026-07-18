@@ -397,6 +397,7 @@ async function startServer() {
       // Final Success Response
       res.status(200).json({
         status: "success",
+        simulated: true,
         transactionId: method.substring(0, 2).toUpperCase() + Math.random().toString(36).substring(7).toUpperCase(),
         gatewayReference: gatewayRef,
         message: message || `${method} payment processed successfully`,

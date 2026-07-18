@@ -151,6 +151,7 @@ export interface Order {
   status: OrderStatus;
   paymentMethod: 'mpesa' | 'emola' | 'card' | 'cod' | 'bank';
   paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentSimulated?: boolean;
   deliveryMethod: 'pickup' | 'delivery';
   deliveryAddress?: string;
   whatsappContacted: boolean;
