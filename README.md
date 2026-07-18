@@ -45,13 +45,15 @@ NODE_ENV=development
 
 ### 4. Firebase Configuration
 
-Copy the example Firebase config and fill in your real project values:
+`firebase-applet-config.json` is committed to the repository intentionally. It contains only **public** Firebase client config (apiKey, authDomain, projectId, etc.) that Vite bundles into the frontend at build time. This is not a secret — Firebase security is enforced by `firestore.rules`, not by hiding this file.
+
+For local development, copy the example and fill in your own values:
 
 ```bash
 cp firebase-applet-config.example.json firebase-applet-config.json
 ```
 
-Then edit `firebase-applet-config.json` with your Firebase project's values (found in Firebase Console > Project Settings > General). This file is gitignored and will not be committed.
+**Note:** `GEMINI_API_KEY` (a real secret) remains correctly excluded via `.env` and `.gitignore`.
 
 ### 5. Running the Application
 
