@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const ensureProfile = async (u: User, name?: string) => {
     const docRef = doc(db, 'users', u.uid);
     const docSnap = await getDoc(docRef);
-    const isAdmin = u.email === 'sabushmike@gmail.com';
     const computedName = name || u.displayName || u.email?.split('@')[0] || 'User';
 
     if (!docSnap.exists()) {
@@ -43,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: u.email,
         displayName: computedName,
         photoURL: u.photoURL || '',
-        role: isAdmin ? 'admin' : 'customer',
+        role: 'customer',
         isBanned: false,
         preferredLanguage: 'pt',
         createdAt: new Date().toISOString()
@@ -105,18 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileUnsubscribe = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data() as UserProfile;
-            
-            // Auto-promote specific owner to admin
-            if (user.email === 'sabushmike@gmail.com' && data.role !== 'admin') {
-              updateDoc(doc(db, 'users', user.uid), { role: 'admin' }).catch((error) => {
-                console.error("Error promoting admin:", error);
-              });
-              setProfile({ ...data, role: 'admin' });
-              setLoading(false);
-            } else {
-              setProfile(data);
-              setLoading(false);
-            }
+            setProfile(data);
+            setLoading(false);
           } else {
             // Profile doesn't exist yet (e.g., registration in progress)
             // Immediately stop loading spinner so user isn't frozen; profile will stream once ensureProfile writes

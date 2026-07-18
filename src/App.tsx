@@ -120,7 +120,7 @@ function AppRoutes() {
         {user ? <RegisterSeller /> : <Login redirect="/become-seller" />}
       </Route>
       <Route path="/admin">
-        {(profile?.role === 'admin' || user?.email === 'sabushmike@gmail.com') ? <AdminPanel /> : (user ? <Home /> : <Login redirect="/admin" />)}
+        {profile?.role === 'admin' ? <AdminPanel /> : (user ? <Home /> : <Login redirect="/admin" />)}
       </Route>
     </Layout>
   );

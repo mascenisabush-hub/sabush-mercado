@@ -91,3 +91,15 @@ npm start
 ## License
 
 MIT
+
+## Admin Migration Note
+
+The previous codebase hardcoded `sabushmike@gmail.com` as a permanent admin bypass in both Firestore security rules and the frontend. This has been removed. Admin access now relies solely on the `role` field in the user's Firestore document.
+
+**Before deploying this change**, ensure the Firestore user document for `sabushmike@gmail.com` has `role: 'admin'` set. If not, manually update it via the Firebase Console:
+
+1. Go to Firebase Console > Firestore Database
+2. Navigate to the `users` collection
+3. Find the document with `email: "sabushmike@gmail.com"`
+4. Set the `role` field to `"admin"`
+5. Deploy the updated `firestore.rules`

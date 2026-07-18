@@ -32,16 +32,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && (
-        (request.auth.token.email == 'sabushmike@gmail.com') ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer') == 'admin')
-      );
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'customer') == 'admin';
     }
 
     function isNotBanned() {
       return isSignedIn() && (
-        (request.auth.token.email == 'sabushmike@gmail.com') ||
         !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isBanned', false) == false
       );
@@ -59,14 +56,13 @@ service cloud.firestore {
       allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin()) && 
         incoming().uid == userId && 
         incoming().role in ['customer', 'seller', 'admin'] && (
-          incoming().role != 'admin' || request.auth.token.email == 'sabushmike@gmail.com'
+          incoming().role != 'admin' || isAdmin()
         );
       allow update: if (isSignedIn() && (request.auth.uid == userId || isAdmin()) && 
         incoming().uid == existing().uid &&
         (!('isBanned' in incoming()) || incoming().isBanned == existing().get('isBanned', false)) &&
         (!('role' in incoming()) || incoming().role == existing().get('role', 'customer') || incoming().role == 'seller' || isAdmin())
       ) || 
-      (isSignedIn() && request.auth.token.email == 'sabushmike@gmail.com') ||
       isAdmin();
 
       match /addresses/{addressId} {
@@ -239,9 +235,9 @@ service cloud.firestore {
 
     // --- Reports ---
     match /reports/{reportId} {
-      allow read, list: if isSignedIn() && (request.auth.token.email == 'sabushmike@gmail.com' || isAdmin());
+      allow read, list: if isSignedIn() && isAdmin();
       allow create: if isSignedIn() && isNotBanned() && incoming().reporterId == request.auth.uid;
-      allow update: if isSignedIn() && (request.auth.token.email == 'sabushmike@gmail.com' || isAdmin());
+      allow update: if isSignedIn() && isAdmin();
     }
 
     // --- Reviews ---
