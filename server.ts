@@ -97,6 +97,35 @@ const ai = new GoogleGenAI({
 });
 
 async function startServer() {
+  // --- Startup validation ---
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '') {
+    console.error('[STARTUP ERROR] GEMINI_API_KEY is not set or is empty. Add it to your .env file or environment variables.');
+    process.exit(1);
+  }
+
+  const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  if (!fs.existsSync(configPath)) {
+    console.error(`[STARTUP ERROR] Firebase config file not found at: ${configPath}`);
+    console.error('Create a firebase-applet-config.json in the project root with at least projectId, apiKey, and authDomain.');
+    process.exit(1);
+  }
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    const missing: string[] = [];
+    if (!raw.projectId) missing.push('projectId');
+    if (!raw.apiKey) missing.push('apiKey');
+    if (!raw.authDomain) missing.push('authDomain');
+    if (missing.length > 0) {
+      console.error(`[STARTUP ERROR] firebase-applet-config.json is missing required fields: ${missing.join(', ')}`);
+      process.exit(1);
+    }
+  } catch (e) {
+    console.error(`[STARTUP ERROR] firebase-applet-config.json is not valid JSON: ${(e as Error).message}`);
+    process.exit(1);
+  }
+  // --- End startup validation ---
+
   const app = express();
   const PORT = process.env.PORT || 3000;
 
