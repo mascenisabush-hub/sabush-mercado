@@ -199,44 +199,17 @@ async function startServer() {
 
       const keywords = JSON.parse(response.text || "[]");
       
-      // We construct high-quality Unsplash image URLs based on these keywords
-      // In a production app, you might use a real Search API like Google Custom Search or Bing Visual Search
       const suggestions = keywords.map((kw: string) => {
-        const encoded = encodeURIComponent(kw.toLowerCase().replace(/\s+/g, ','));
+        const encoded = encodeURIComponent(kw.trim().replace(/\s+/g, ','));
         return {
           id: Math.random().toString(36).substring(7),
-          url: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop&keywords=${encoded}`, // Placeholder format
+          url: `https://source.unsplash.com/800x600/?${encoded}`,
           source: 'Unsplash (Commercial Use)',
-          preview: `https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop`,
-          // Note: In real world, we'd fetch actual IDs via Unsplash API.
-          // For this solution, we'll provide a variety of high-quality tech/lifestyle stock seeds
-          realSeed: `https://images.unsplash.com/photo-${['1505740420928-5e560c06d30e', '1523275335684-37898b6baf30', '1611186871348-b1ec696e5205', '1491553895911-0055eca6402d', '1542291026-7eec264c27ff'][Math.floor(Math.random() * 5)]}?auto=format&fit=crop&q=80&w=800`
+          preview: `https://source.unsplash.com/400x300/?${encoded}`,
         };
       });
 
-      // Special adjustment to make them look real/relevant
-      const realSuggestions = suggestions.map((s: any, i: number) => {
-        const seeds = [
-          '1505740420928-5e560c06d30e', // Headphone
-          '1523275335684-37898b6baf30', // Watch
-          '1611186871348-b1ec696e5205', // Camera
-          '1491553895911-0055eca6402d', // Shoes
-          '1542291026-7eec264c27ff', // Red Shoe
-          '1572635196237-14b3f281503f', // Sunglasses
-          '1560343060-c142ba36739b', // Perfume
-          '1526170375885-4d8ecbc6a27d', // Camera old
-          '1503602642458-232111445657', // Chair
-          '1581235720704-06d3acfcba80'  // Product
-        ];
-        const seedIndex = (Math.abs(productName.length + i)) % seeds.length;
-        const seed = seeds[seedIndex];
-        return {
-          ...s,
-          url: `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&q=80&w=800`
-        };
-      });
-
-      res.json({ images: realSuggestions });
+      res.json({ images: suggestions });
     } catch (error) {
       console.error("Image search error:", error);
       res.status(500).json({ error: "Failed to search images" });
