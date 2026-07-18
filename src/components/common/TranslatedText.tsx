@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, RefreshCw } from 'lucide-react';
+import { auth } from '../../lib/firebase';
 
 interface TranslatedTextProps {
   text: string;
@@ -65,9 +66,13 @@ async function triggerQueueProcessing() {
     await new Promise((r) => setTimeout(r, 200));
 
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/translate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
         body: JSON.stringify({
           text: req.text,
           targetLanguages: [req.targetLang]

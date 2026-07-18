@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { X, Package, Camera, Plus, Trash2, ArrowRight, Wand2, Sparkles, Loader2, Search, Crop, Check, AlertCircle, UploadCloud, Image } from 'lucide-react';
@@ -171,16 +171,23 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
       let translations: any = {};
       
       try {
+        const idToken = await auth.currentUser?.getIdToken();
         const nameRes = await fetch('/api/ai/translate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+          },
           body: JSON.stringify({ text: formData.name, targetLanguages: targetLangs })
         });
         const nameTrans = await nameRes.json();
         
         const descRes = await fetch('/api/ai/translate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+          },
           body: JSON.stringify({ text: formData.description, targetLanguages: targetLangs })
         });
         const descTrans = await descRes.json();
@@ -302,9 +309,13 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
     });
 
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/ai/moderate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
         body: JSON.stringify({ imageUrl: url, productName: formData.name })
       });
       const data = await res.json();
@@ -323,9 +334,13 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
     setSearchingImages(true);
     setShowSuggestions(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/ai/search-images', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
         body: JSON.stringify({ productName: formData.name, category: formData.category })
       });
       const data = await res.json();
@@ -390,9 +405,13 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
     if (!formData.name) return;
     setGenerating(true);
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const res = await fetch('/api/ai/suggest-description', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+        },
         body: JSON.stringify({ 
           productName: formData.name, 
           category: formData.category,

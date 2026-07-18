@@ -7,7 +7,7 @@ import { useLocation } from '../context/LocationContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatCurrency, cn, getDistance } from '../lib/utils';
 import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { handleFirestoreError, OperationType, parseFirestoreError } from '../lib/firebaseErrors';
 import { motion, AnimatePresence } from 'motion/react';
 import { SavedAddress } from '../types';
@@ -335,9 +335,13 @@ export function Cart() {
           bank: 'Bank Transfer'
         };
 
+        const idToken = await auth.currentUser?.getIdToken();
         const response = await fetch('/api/payments/process', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
+          },
           body: JSON.stringify({
             method: methodMap[paymentMethod as keyof typeof methodMap],
             phoneNumber: phoneNumber,

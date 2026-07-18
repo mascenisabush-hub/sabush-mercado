@@ -1,10 +1,12 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs";
 import rateLimit from "express-rate-limit";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
 dotenv.config();
 
@@ -96,6 +98,45 @@ const ai = new GoogleGenAI({
   }
 });
 
+// Initialize Firebase Admin SDK
+// A service account key file is required for server-side token verification.
+// Generate one in Firebase Console > Project Settings > Service Accounts > Generate New Private Key.
+// Set the FIREBASE_SERVICE_ACCOUNT_PATH env variable to the path of the downloaded JSON file.
+// If running locally with the Firebase CLI, Application Default Credentials may be available automatically.
+if (!getApps().length) {
+  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+  if (serviceAccountPath && fs.existsSync(serviceAccountPath)) {
+    const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+    initializeApp({
+      credential: cert(serviceAccount),
+      projectId: PROJECT_ID,
+    });
+    console.log(`[FIREBASE ADMIN] Initialized with service account from: ${serviceAccountPath}`);
+  } else {
+    // Fall back to Application Default Credentials (e.g., when running via `firebase emulators` or GCP)
+    initializeApp({ projectId: PROJECT_ID });
+    console.log('[FIREBASE ADMIN] Initialized with Application Default Credentials. For production, set FIREBASE_SERVICE_ACCOUNT_PATH.');
+  }
+}
+
+// Middleware to verify Firebase Auth ID tokens
+async function verifyAuthToken(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: "Authentication required. Missing or invalid Authorization header." });
+  }
+
+  const idToken = authHeader.split('Bearer ')[1];
+  try {
+    const decodedToken = await getAuth().verifyIdToken(idToken);
+    (req as any).user = { uid: decodedToken.uid, email: decodedToken.email };
+    next();
+  } catch (error) {
+    console.error("[AUTH] Token verification failed:", (error as Error).message);
+    return res.status(401).json({ error: "Invalid or expired authentication token." });
+  }
+}
+
 async function startServer() {
   // --- Startup validation ---
   if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '') {
@@ -155,7 +196,7 @@ async function startServer() {
   });
 
   // Multilingual content translation
-  app.post("/api/translate", apiLimiter, async (req, res) => {
+  app.post("/api/translate", apiLimiter, verifyAuthToken, async (req, res) => {
     const { text, targetLanguages } = req.body;
     
     if (!text || !targetLanguages || !Array.isArray(targetLanguages)) {
@@ -190,7 +231,7 @@ async function startServer() {
   });
 
   // AI Content Assistant
-  app.post("/api/ai/suggest-description", apiLimiter, async (req, res) => {
+  app.post("/api/ai/suggest-description", apiLimiter, verifyAuthToken, async (req, res) => {
     const { productName, category, keyFeatures } = req.body;
     
     if (!productName) {
@@ -218,7 +259,7 @@ async function startServer() {
   });
 
   // AI Smart Image Search (Predictive Search)
-  app.post("/api/ai/search-images", apiLimiter, async (req, res) => {
+  app.post("/api/ai/search-images", apiLimiter, verifyAuthToken, async (req, res) => {
     const { productName, category } = req.body;
     
     if (!productName) {
@@ -263,7 +304,7 @@ async function startServer() {
   });
 
   // Image Moderation
-  app.post("/api/ai/moderate", apiLimiter, async (req, res) => {
+  app.post("/api/ai/moderate", apiLimiter, verifyAuthToken, async (req, res) => {
     const { imageUrl, productName } = req.body;
     
     if (!imageUrl) return res.status(400).json({ error: "Image URL is required" });
@@ -297,7 +338,7 @@ async function startServer() {
   });
 
   // Enhanced Payment Processing (M-Pesa, e-Mola, Bank)
-  app.post("/api/payments/process", paymentLimiter, (req, res) => {
+  app.post("/api/payments/process", paymentLimiter, verifyAuthToken, (req, res) => {
     const { method, phoneNumber, amount, orderIds, customerName } = req.body;
     
     // Basic validation
