@@ -45,19 +45,13 @@ NODE_ENV=development
 
 ### 4. Firebase Configuration
 
-The application expects a `firebase-applet-config.json` file in the root directory. This contains your Firebase project configuration.
+Copy the example Firebase config and fill in your real project values:
 
-```json
-{
-  "apiKey": "...",
-  "authDomain": "...",
-  "projectId": "...",
-  "storageBucket": "...",
-  "messagingSenderId": "...",
-  "appId": "...",
-  "measurementId": "..."
-}
+```bash
+cp firebase-applet-config.example.json firebase-applet-config.json
 ```
+
+Then edit `firebase-applet-config.json` with your Firebase project's values (found in Firebase Console > Project Settings > General). This file is gitignored and will not be committed.
 
 ### 5. Running the Application
 
