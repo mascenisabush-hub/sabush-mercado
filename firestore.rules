@@ -63,7 +63,7 @@ service cloud.firestore {
         (!('isBanned' in incoming()) || incoming().isBanned == existing().get('isBanned', false)) &&
         (!('role' in incoming()) || incoming().role == existing().get('role', 'customer') || incoming().role == 'seller' || isAdmin())
       ) || 
-      isAdmin();
+      (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['isBanned', 'role']));
 
       match /addresses/{addressId} {
         allow read, write: if isSignedIn() && request.auth.uid == userId;
@@ -169,7 +169,7 @@ service cloud.firestore {
         // Payment process updates payment status
         (isOwner(existing().customerId) && 
          incoming().diff(existing()).affectedKeys().hasOnly(['paymentStatus']))
-      )) || isAdmin();
+      )) || (isAdmin() && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paymentStatus', 'trackingStatus', 'trackingHistory']));
     }
 
     // --- Chats ---
