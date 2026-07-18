@@ -118,7 +118,7 @@ async function startServer() {
 
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-1.5-flash",
         contents: `Translate the following text into these languages: ${targetLanguages.join(", ")}. Return a JSON object where keys are language codes and values are the translations.
         
         Text to translate:
@@ -160,7 +160,7 @@ async function startServer() {
       The description should be around 2-3 short paragraphs, highlighting the value proposition for customers in Mozambique. Use an elegant and trustworthy tone.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-1.5-flash",
         contents: prompt
       });
 
@@ -186,7 +186,7 @@ async function startServer() {
       Return a JSON array of strings.`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -229,7 +229,7 @@ async function startServer() {
       Return a JSON object: { "safe": boolean, "reason": string }`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
