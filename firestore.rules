@@ -92,8 +92,13 @@ service cloud.firestore {
                     (isOwner(existing().ownerId) && isValidStore(incoming()) &&
                      (!incoming().diff(existing()).affectedKeys().hasAny(['isVerifiedBusiness']) || 
                       incoming().get('isVerifiedBusiness', false) == existing().get('isVerifiedBusiness', false)))
-                    )) ||
-                    (isSignedIn() && isNotBanned() && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'reviewCount']));
+                    ));
+      // NOTE: rating/reviewCount were previously updatable directly by any signed-in user,
+      // which allowed arbitrary manipulation of a store's rating without an actual review.
+      // This bypass has been removed. Rating/reviewCount aggregation should be handled
+      // server-side via a Cloud Function trigger on the /reviews/{reviewId} collection
+      // (on create/update/delete, recompute and write the aggregate rating and reviewCount
+      // using admin privileges). This Cloud Function does not exist yet — known gap.
       allow delete: if isAdmin();
     }
 
@@ -113,8 +118,13 @@ service cloud.firestore {
       allow update: if (isNotBanned() && (
                     get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid || 
                     isAdmin()) && isValidProduct(incoming())) || 
-                    (isNotBanned() && incoming().status == 'removed' && (get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid || isAdmin())) ||
-                    (isSignedIn() && isNotBanned() && incoming().diff(existing()).affectedKeys().hasOnly(['rating', 'reviewCount']));
+                    (isNotBanned() && incoming().status == 'removed' && (get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid || isAdmin()));
+      // NOTE: rating/reviewCount were previously updatable directly by any signed-in user,
+      // which allowed arbitrary manipulation of a product's rating without an actual review.
+      // This bypass has been removed. Rating/reviewCount aggregation should be handled
+      // server-side via a Cloud Function trigger on the /reviews/{reviewId} collection
+      // (on create/update/delete, recompute and write the aggregate rating and reviewCount
+      // using admin privileges). This Cloud Function does not exist yet — known gap.
       allow delete: if (isNotBanned() && 
                     get(/databases/$(database)/documents/stores/$(existing().storeId)).data.ownerId == request.auth.uid) || isAdmin();
     }

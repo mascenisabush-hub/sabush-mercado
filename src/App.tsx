@@ -13,6 +13,7 @@ import { RouterProvider, Route } from './components/common/RouteLink';
 import { LanguageProvider } from './context/LanguageContext';
 import { CompareProvider } from './context/CompareContext';
 import { Layout } from './components/layout/Layout';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Home } from './pages/Home';
 import { Marketplace } from './pages/Marketplace';
 import { ShieldOff, LogOut } from 'lucide-react';
@@ -147,7 +148,9 @@ export default function App() {
                 <CompareProvider>
                   <RouterProvider>
                     <PWAManager />
-                    <AppRoutes />
+                    <ErrorBoundary>
+                      <AppRoutes />
+                    </ErrorBoundary>
                   </RouterProvider>
                 </CompareProvider>
               </CartProvider>
