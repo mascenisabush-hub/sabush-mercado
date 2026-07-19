@@ -27,6 +27,7 @@ import { Skeleton, StoreSkeleton } from '../components/common/Skeleton';
 import { useNavigate } from '../components/common/RouteLink';
 import { calculateStoreChatStats, calculateStoreOrderStats } from '../lib/trustSignals';
 import { OrderProgressSteps } from '../components/common/OrderProgressSteps';
+import { compressImage } from '../lib/imageCompression';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, AreaChart, Area
@@ -172,15 +173,16 @@ export function SellerDashboard() {
       setLiveTrust(null);
       return;
     }
+    const currentStore = store; // Narrowed to non-null for use inside the nested async function below
     async function loadLiveTrust() {
       try {
-        const chatStats = await calculateStoreChatStats(store.ownerId);
-        const orderStats = await calculateStoreOrderStats(store.id);
+        const chatStats = await calculateStoreChatStats(currentStore.ownerId);
+        const orderStats = await calculateStoreOrderStats(currentStore.id);
         setLiveTrust({
-          responseRate: store.responseRate !== undefined ? store.responseRate : chatStats.responseRate,
-          averageResponseTime: store.averageResponseTime !== undefined ? store.averageResponseTime : chatStats.averageResponseTimeText,
-          fulfillmentRate: store.fulfillmentRate !== undefined ? store.fulfillmentRate : orderStats.fulfillmentRate,
-          totalSales: store.totalSales !== undefined ? store.totalSales : orderStats.totalSales
+          responseRate: currentStore.responseRate !== undefined ? currentStore.responseRate : chatStats.responseRate,
+          averageResponseTime: currentStore.averageResponseTime !== undefined ? currentStore.averageResponseTime : chatStats.averageResponseTimeText,
+          fulfillmentRate: currentStore.fulfillmentRate !== undefined ? currentStore.fulfillmentRate : orderStats.fulfillmentRate,
+          totalSales: currentStore.totalSales !== undefined ? currentStore.totalSales : orderStats.totalSales
         });
       } catch (e) {
         console.error("Live trust load error: ", e);
@@ -398,8 +400,9 @@ export function SellerDashboard() {
 
     setUploadingLogo(true);
     try {
+      const compressedFile = await compressImage(file, { maxDimension: 800, quality: 0.85 });
       const storageRef = ref(storage, `stores/${user.uid}/logo_${Date.now()}`);
-      await uploadBytes(storageRef, file);
+      await uploadBytes(storageRef, compressedFile);
       const downloadURL = await getDownloadURL(storageRef);
       
       await updateDoc(doc(db, 'stores', store.id), {
@@ -1298,7 +1301,7 @@ export function SellerDashboard() {
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-black text-2xl overflow-hidden border border-blue-100/30">
                       {item.logo ? (
-                        <img src={item.logo} alt="" className="w-full h-full object-cover" />
+                        <img src={item.logo} alt="" className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         item.businessName[0].toUpperCase()
                       )}
@@ -1724,7 +1727,7 @@ export function SellerDashboard() {
       <aside className="md:w-64 space-y-2">
         <div className="bg-white p-6 rounded-[32px] border border-gray-100 mb-6 shadow-sm">
            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl mb-4 mx-auto overflow-hidden">
-             {store?.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" /> : store?.businessName[0]}
+             {store?.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" loading="lazy" /> : store?.businessName[0]}
            </div>
            <h3 className="font-bold text-gray-900 text-center line-clamp-1">{store?.businessName || 'My Store'}</h3>
            <div className="flex items-center justify-center gap-1.5 mt-1">
@@ -2550,7 +2553,7 @@ export function SellerDashboard() {
                                       <div className="flex items-center gap-1">
                                         <span>WhatsApp:</span>
                                         <a 
-                                          href={`https://wa.me/${(order.isGuest ? order.guestWhatsapp : order.customerPhone || '').replace(/\D/g, '')}`}
+                                          href={`https://wa.me/${((order.isGuest ? order.guestWhatsapp : order.customerPhone) || '').replace(/\D/g, '')}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="font-black text-green-605 text-green-600 hover:underline p-0.5 bg-green-50 rounded border border-green-100 flex items-center gap-0.5"
@@ -2815,7 +2818,7 @@ export function SellerDashboard() {
                           {prod ? (
                             <div className="flex gap-3">
                               <div className="w-12 h-12 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden shrink-0">
-                                <img src={prod.images?.[0]} alt="" className="w-full h-full object-cover" />
+                                <img src={prod.images?.[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-xs font-black text-gray-900 leading-snug line-clamp-2 italic">{prod.name}</h4>
@@ -2928,7 +2931,7 @@ export function SellerDashboard() {
                           }}
                           onClick={() => fileInputRef.current?.click()}
                         >
-                           {store?.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center font-black text-4xl text-gray-300 bg-gray-50">{store?.businessName[0]}</div>}
+                           {store?.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center font-black text-4xl text-gray-300 bg-gray-50">{store?.businessName[0]}</div>}
                            <div 
                              className={cn(
                                "absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center text-white font-bold text-xs",

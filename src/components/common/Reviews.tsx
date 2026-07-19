@@ -184,7 +184,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             <div className="shrink-0 animate-fade-in">
                <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-50 group-hover:shadow-md transition-all">
                   {review.userPhoto ? (
-                    <img src={review.userPhoto} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={review.userPhoto} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-600 font-extrabold text-lg">
                        {review.userName?.[0]?.toUpperCase() || <User className="w-5 h-5" />}
@@ -388,7 +388,7 @@ export function StoreReviews({ storeId }: StoreReviewsProps) {
             <div className="shrink-0 animate-fade-in">
                <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 border border-gray-50 group-hover:shadow-md transition-all">
                   {review.userPhoto ? (
-                    <img src={review.userPhoto} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={review.userPhoto} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-600 font-extrabold text-lg">
                        {review.userName?.[0]?.toUpperCase() || <User className="w-5 h-5" />}

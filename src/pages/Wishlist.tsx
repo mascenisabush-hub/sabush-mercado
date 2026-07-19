@@ -144,7 +144,7 @@ export function Wishlist() {
                    className="group bg-white rounded-[32px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all"
                  >
                    <Link to={`/product/${p.id}`} className="block aspect-square overflow-hidden relative">
-                     <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={p.name} />
+                     <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={p.name} loading="lazy" />
                      <div className="absolute top-4 left-4 flex flex-col gap-2">
                         {p.minOrderQuantity > 1 && (
                            <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 leading-none">

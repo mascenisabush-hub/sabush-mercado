@@ -425,7 +425,6 @@ export function ProductDetails({ id }: { id: string }) {
       } catch (err) {
         // Cancelled by user is a normal interaction, not an error
         if ((err as Error).name === 'AbortError') {
-          console.log('Share canceled by user');
           return;
         }
         console.warn('Web Share failed, attempting fallback copy:', err);
@@ -863,7 +862,7 @@ export function ProductDetails({ id }: { id: string }) {
                <Link to={`/store/${product.storeId}`} className="flex items-center justify-between group">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl overflow-hidden">
-                      {store?.logo ? <img src={store.logo} className="w-full h-full object-cover" /> : store?.businessName?.[0] || 'S'}
+                      {store?.logo ? <img src={store.logo} className="w-full h-full object-cover" loading="lazy" /> : store?.businessName?.[0] || 'S'}
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
@@ -1003,7 +1002,7 @@ export function ProductDetails({ id }: { id: string }) {
               {[1,2,3].map(i => (
                  <Link key={i} to={`/product/${i}`} className="flex items-center gap-4 group">
                     <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
-                       <img src={`https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&q=80&w=200`} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                       <img src={`https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&q=80&w=200`} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform" loading="lazy" />
                     </div>
                     <div>
                        <h4 className="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">Related Smartphone Elite</h4>

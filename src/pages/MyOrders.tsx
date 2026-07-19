@@ -330,7 +330,7 @@ export function MyOrders() {
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between">
                        <div className="flex items-center gap-3">
-                          <img src={item.image} alt="" className="w-12 h-12 rounded-xl object-cover" />
+                          <img src={item.image} alt="" className="w-12 h-12 rounded-xl object-cover" loading="lazy" />
                           <div>
                              <p className="font-bold text-gray-900 text-sm">{item.name}</p>
                              <div className="flex items-center gap-2 mt-0.5">

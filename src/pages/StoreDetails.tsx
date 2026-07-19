@@ -150,6 +150,7 @@ export function StoreDetails({ id }: { id: string }) {
             src={store.banner || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1200'} 
             className="w-full h-full object-cover" 
             alt="Store Banner"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
         </div>
@@ -158,7 +159,7 @@ export function StoreDetails({ id }: { id: string }) {
           <div className="flex items-end gap-6">
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[40px] bg-white p-2 shadow-2xl border border-gray-100 relative z-10">
               <div className="w-full h-full rounded-[32px] overflow-hidden bg-blue-600 flex items-center justify-center text-white text-4xl font-black">
-                {store.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" /> : store.businessName[0]}
+                {store.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" loading="lazy" /> : store.businessName[0]}
               </div>
             </div>
             <div className="pb-4">
@@ -363,6 +364,7 @@ export function StoreDetails({ id }: { id: string }) {
                             src={product.images[0]} 
                             alt={product.name} 
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            loading="lazy"
                           />
                           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button className="p-2 bg-white rounded-xl shadow-lg text-gray-400 hover:text-red-500 transition-colors">

@@ -91,7 +91,7 @@ export function RFQModal({ isOpen, onClose, product }: RFQModalProps) {
 
               <div className="mb-6 p-4 bg-gray-50 rounded-3xl flex gap-4 border border-gray-100">
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                   <img src={product.images[0]} className="w-full h-full object-cover" alt="" />
+                   <img src={product.images[0]} className="w-full h-full object-cover" alt="" loading="lazy" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>

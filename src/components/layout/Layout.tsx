@@ -164,7 +164,7 @@ export function Layout({ children }: LayoutProps) {
                <div className="flex items-center gap-2">
                  <Link to={isAdmin ? "/admin" : (isSeller ? "/dashboard" : "/orders")} className="hidden sm:flex items-center gap-2 p-1.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
                    {user.photoURL ? (
-                     <img src={user.photoURL} alt={user.displayName || ''} className="w-8 h-8 rounded-full border border-white" />
+                     <img src={user.photoURL} alt={user.displayName || ''} className="w-8 h-8 rounded-full border border-white" loading="lazy" />
                    ) : (
                      <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-600">
                        <User className="w-5 h-5" />
@@ -232,7 +232,7 @@ export function Layout({ children }: LayoutProps) {
                   <div className="space-y-4">
                     <div className="flex items-center gap-4 p-4 bg-brand-50 rounded-2xl">
                       {user.photoURL ? (
-                        <img src={user.photoURL} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="" />
+                        <img src={user.photoURL} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="" loading="lazy" />
                       ) : (
                         <div className="w-12 h-12 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
                           {profile?.displayName?.[0] || user.email?.[0].toUpperCase()}
@@ -340,7 +340,7 @@ export function Layout({ children }: LayoutProps) {
                              <div className="w-8 h-8 flex items-center justify-center text-gray-400 group-hover:text-brand-600 group-hover:bg-white rounded-lg transition-colors">
                                {Icon && <Icon className="w-5 h-5" />}
                              </div>
-                             <span className="text-sm font-bold text-gray-700">{t(cat.translationKey, cat.name)}</span>
+                             <span className="text-sm font-bold text-gray-700">{t(cat.translationKey || cat.name, cat.name)}</span>
                            </div>
                            <ChevronRight className="w-4 h-4 text-gray-200" />
                          </Link>

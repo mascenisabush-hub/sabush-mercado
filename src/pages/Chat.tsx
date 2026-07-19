@@ -140,7 +140,7 @@ export function Chat() {
                       isSelected ? "bg-white/25 border-white/20 text-white" : "bg-blue-50 text-blue-600 border-gray-100"
                     )}>
                       {partnerAvatar ? (
-                        <img src={partnerAvatar} alt={partnerName} className="w-full h-full object-cover" />
+                        <img src={partnerAvatar} alt={partnerName} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <User className="w-6 h-6" />
                       )}
@@ -196,7 +196,7 @@ export function Chat() {
 
                   <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-blue-50 text-blue-600 border border-gray-150 shrink-0">
                     {currentPartnerAvatar ? (
-                      <img src={currentPartnerAvatar} alt="" className="w-full h-full object-cover" />
+                      <img src={currentPartnerAvatar} alt="" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
                       <User className="w-5 h-5" />
                     )}

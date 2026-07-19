@@ -60,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getRedirectResult(auth)
       .then(async (result) => {
         if (result && result.user) {
-          console.log("Redirect sign-in successful:", result.user);
           await ensureProfile(result.user);
         }
       })
@@ -88,12 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(user);
       if (user) {
         setLoading(true);
-        console.log("Authenticated User:", {
-          uid: user.uid,
-          email: user.email,
-          emailVerified: user.emailVerified,
-          isAnonymous: user.isAnonymous
-        });
         
         // Eagerly and asynchronously ensure profile exists to heal any missing profile states
         ensureProfile(user).catch((err) => {
@@ -115,7 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }, (error) => {
           // If the user already logged out or is logging out, ignore errors from the profile listener
           if (!auth.currentUser || (error.code === 'permission-denied' && !auth.currentUser)) {
-            console.log("Profile listener detached or blocked due to logout/session expiration.");
             return;
           }
           console.error("Profile listener error (gracefully handled):", error);
@@ -197,10 +189,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       
-      console.log("Attempting Google sign-in via popup...");
       const result = await signInWithPopup(auth, provider);
       if (result && result.user) {
-        console.log("Popup sign-in successful:", result.user);
         await ensureProfile(result.user);
       }
     } catch (error: any) {

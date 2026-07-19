@@ -234,7 +234,7 @@ export function Settings() {
           <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm text-center">
             <div className="w-24 h-24 bg-gray-50 rounded-[35px] mx-auto mb-6 flex items-center justify-center border-4 border-white shadow-xl overflow-hidden">
               {user.photoURL ? (
-                <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                <img src={user.photoURL} alt="" className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <User className="w-12 h-12 text-gray-300" />
               )}

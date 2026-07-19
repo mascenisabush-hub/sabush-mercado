@@ -936,7 +936,7 @@ function UserRow({
         <div className={`flex items-center gap-3 transition-opacity duration-200 ${user.isBanned ? 'opacity-60' : 'opacity-100'}`}>
           <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden border border-gray-100 shrink-0">
             {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+              <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600 font-bold">
                 {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
@@ -1046,7 +1046,7 @@ function ListingRow({ product, onDelete }: { product: any, onDelete: (id: string
       <td className="px-6 py-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
-            {product.images?.[0] ? <img src={product.images[0]} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 m-2.5 text-gray-300" />}
+            {product.images?.[0] ? <img src={product.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" /> : <Package className="w-5 h-5 m-2.5 text-gray-300" />}
           </div>
           <div>
             <p className="font-bold text-gray-900 line-clamp-1">{product.name}</p>
@@ -1092,7 +1092,7 @@ function StoreRow({
       <td className="px-6 py-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-100 rounded-xl overflow-hidden shadow-sm">
-            {store.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center bg-purple-100 text-purple-600 font-bold">{store.businessName[0]}</div>}
+            {store.logo ? <img src={store.logo} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center bg-purple-100 text-purple-600 font-bold">{store.businessName[0]}</div>}
           </div>
           <div>
             <p className="font-bold text-gray-900">{store.businessName}</p>

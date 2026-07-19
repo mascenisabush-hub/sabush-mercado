@@ -729,7 +729,7 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
                               <div className="flex gap-3">
                                 <div className="w-16 h-16 bg-white rounded-xl border border-gray-100 overflow-hidden flex-shrink-0 relative">
                                   {img ? (
-                                    <img src={img} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" />
+                                    <img src={img} className="w-full h-full object-cover" alt="" referrerPolicy="no-referrer" loading="lazy" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                                       <Camera className="w-6 h-6" />
@@ -832,7 +832,7 @@ export function AddProductModal({ isOpen, onClose, store }: AddProductModalProps
                                   onClick={() => selectSuggestion(s.url)}
                                   className="aspect-square rounded-xl overflow-hidden group relative"
                                 >
-                                  <img src={s.url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="" referrerPolicy="no-referrer" />
+                                  <img src={s.url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="" referrerPolicy="no-referrer" loading="lazy" />
                                   <div className="absolute inset-0 bg-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                      <Plus className="w-6 h-6 text-white" />
                                   </div>

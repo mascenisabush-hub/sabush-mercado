@@ -309,7 +309,7 @@ export function Cart() {
               selectedColor: item.selectedColor,
               selectedSize: item.selectedSize
             })),
-            totalAmount: storeItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0),
+            totalAmount: storeItems.reduce((acc: number, curr) => acc + (curr.price * curr.quantity), 0),
             status: 'pending',
             paymentMethod,
             paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending', // Will update after API call
@@ -450,7 +450,7 @@ export function Cart() {
           {items.map((item) => (
             <div key={item.id} className="bg-white p-4 sm:p-6 rounded-[32px] border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-6 relative group">
               <div className="w-full sm:w-32 h-32 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
-                <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+                <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
               </div>
               
               <div className="flex-1 flex flex-col justify-between py-1">
