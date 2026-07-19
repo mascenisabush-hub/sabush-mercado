@@ -282,7 +282,7 @@ export function Home() {
           >
             <div className="relative">
                <img 
-                 src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&q=80&w=600" 
+                 src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=600" 
                  alt="Mozambique Shopping Professional Merchant" 
                  loading="lazy"
                  className="rounded-3xl shadow-2xl border-4 border-white transform rotate-3 hover:rotate-0 transition-transform duration-500 aspect-[4/3] object-cover"
